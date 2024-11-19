@@ -114,24 +114,38 @@ int es8p_metadata_parse(struct es8p_metadata **stru_metadata, const char *b64_Me
                 struct euicc_derutil_node owner;
                 owner.self.ptr = n_iter.value;
                 owner.self.length = 0;
-                p->profileOwner.mccmnc = malloc(11);
+
+                // 初始化 mccmnc 的内存（需要保存 MCC+MNC 的最大长度）
+                p->profileOwner.mccmnc = malloc(7); // MCC(3) + MNC(3) + '\0'
+                if (!p->profileOwner.mccmnc) {
+                    goto err;
+                }
+                memset(p->profileOwner.mccmnc, 0, 7);
+
                 while (euicc_derutil_unpack_next(&owner, &owner, n_iter.value, n_iter.length) == 0) {
                     switch (owner.tag) {
-                        case 0x80:
-                            euicc_hexutil_bin2gsmbcd_nb(p->profileOwner.mccmnc, 6 + 1, owner.value, owner.length);
-                            break;
-                        case 0x81:
-                            p->profileOwner.gid1 = malloc(owner.length + 1);
+                    case 0x80: // MCC+MNC
+                        // Decode GSM BCD to human-readable format (e.g., "310260")
+                        euicc_hexutil_bin2gsmbcd_nb(p->profileOwner.mccmnc, 7, owner.value, owner.length);
+                        break;
+                    case 0x81: // GID1
+                        p->profileOwner.gid1 = malloc(owner.length + 1);
+                        if (p->profileOwner.gid1) {
                             memcpy(p->profileOwner.gid1, owner.value, owner.length);
                             p->profileOwner.gid1[owner.length] = '\0';
-                            break;
-                        case 0x82:
-                            p->profileOwner.gid2 = malloc(owner.length + 1);
+                        }
+                        break;
+                    case 0x82: // GID2
+                        p->profileOwner.gid2 = malloc(owner.length + 1);
+                        if (p->profileOwner.gid2) {
                             memcpy(p->profileOwner.gid2, owner.value, owner.length);
                             p->profileOwner.gid2[owner.length] = '\0';
-                            break;
+                        }
+                        break;
+                    default:
+                        // 处理未知子标签
+                        break;
                     }
-                    break;
                 }
                 break;
             }
@@ -204,14 +218,19 @@ void es8p_metadata_free(struct es8p_metadata **stru_metadata)
 {
     struct es8p_metadata *p = *stru_metadata;
 
-    if (p == NULL)
-    {
+    if (p == NULL) {
         return;
     }
 
     free(p->serviceProviderName);
     free(p->profileName);
     free(p->icon);
+
+    // 释放 profileOwner 相关字段
+    free(p->profileOwner.mccmnc);
+    free(p->profileOwner.gid1);
+    free(p->profileOwner.gid2);
+
     free(p);
 
     *stru_metadata = NULL;
