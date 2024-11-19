@@ -179,13 +179,8 @@ int euicc_hexutil_bin2gsmbcd_nb(char *output, uint32_t output_len, const uint8_t
         return -1;
     }
 
-    length = strlen(output);
-    for (int i = 0; i < length - 1; i += 2)
-    {
-        char temp = output[i];
-        output[i] = output[i + 1];
-        output[i + 1] = temp;
-    }
-
+    output[0] ^= output[1] ^= output[0] ^= output[1];
+    output[2] ^= output[3] ^= output[2] ^= output[3];
+    output[3] ^= output[5] ^= output[3] ^= output[5];
     return 0;
 }
