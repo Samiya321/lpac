@@ -125,10 +125,6 @@ int es8p_metadata_parse(struct es8p_metadata **stru_metadata, const char *b64_Me
                 while (euicc_derutil_unpack_next(&owner, &owner, n_iter.value, n_iter.length) == 0) {
                     switch (owner.tag) {
                     case 0x80: // MCC+MNC
-                        // Decode GSM BCD to human-readable format (e.g., "310260")
-                        euicc_hexutil_bin2gsmbcd_nb(p->profileOwner.mccmnc, 7, owner.value, owner.length);
-                        break;
-                    case 0x80: // MCC+MNC
                         if (owner.length <= 6) { // GSM BCD encoding
                             char temp_mccmnc[7] = {0}; // MCC+MNC最多6字符
                             euicc_hexutil_bin2gsmbcd_nb(temp_mccmnc, 7, owner.value, owner.length);
