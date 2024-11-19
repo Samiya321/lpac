@@ -213,6 +213,7 @@ static int applet_main(int argc, char **argv)
         cJSON_AddStringOrNullToObject(jmetadata, "iccid", profile_metadata->iccid);
         cJSON_AddStringOrNullToObject(jmetadata, "serviceProviderName", profile_metadata->serviceProviderName);
         cJSON_AddStringOrNullToObject(jmetadata, "profileName", profile_metadata->profileName);
+        cJSON_AddStringOrNullToObject(jmetadata, "profileOwnerMccMnc", profile_metadata->profileOwner.mccmnc);
         cJSON_AddStringOrNullToObject(jmetadata, "iconType", euicc_icontype2str(profile_metadata->iconType));
         cJSON_AddStringOrNullToObject(jmetadata, "icon", profile_metadata->icon);
         cJSON_AddStringOrNullToObject(jmetadata, "profileClass", euicc_profileclass2str(profile_metadata->profileClass));
