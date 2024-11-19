@@ -128,6 +128,19 @@ int es8p_metadata_parse(struct es8p_metadata **stru_metadata, const char *b64_Me
                         // Decode GSM BCD to human-readable format (e.g., "310260")
                         euicc_hexutil_bin2gsmbcd_nb(p->profileOwner.mccmnc, 7, owner.value, owner.length);
                         break;
+                    case 0x80: // MCC+MNC
+                        if (owner.length <= 6) { // GSM BCD encoding
+                            char temp_mccmnc[7] = {0}; // MCC+MNC最多6字符
+                            euicc_hexutil_bin2gsmbcd_nb(temp_mccmnc, 7, owner.value, owner.length);
+
+                            // 去除填充字符 'f'
+                            for (int i = 0, j = 0; i < 6 && temp_mccmnc[i] != '\0'; ++i) {
+                                if (temp_mccmnc[i] != 'f') {
+                                    p->profileOwner.mccmnc[j++] = temp_mccmnc[i];
+                                }
+                            }
+                        }
+                        break;                        
                     case 0x81: // GID1
                         p->profileOwner.gid1 = malloc(owner.length + 1);
                         if (p->profileOwner.gid1) {
