@@ -32,6 +32,9 @@ jobs:
         run: sudo ./scripts/setup-debian.sh ${{ matrix.build.variant }}
         if: runner.os == 'Linux'
 
+      - name: Make build script executable 
+        run: chmod +x ./scripts/build-ci.sh
+
       - name: Build for ${{ matrix.build.name }}
         run: ./scripts/build-ci.sh ${{ matrix.build.variant }}
 
